@@ -37,8 +37,6 @@ class BanRecord(models.Model):
     ban_date = PSTDateTimeField(default=timezone.now, null=True)
     reason = models.CharField(max_length=512, null=False)
     unban_date = PSTDateTimeField(null=True, default=None)
-    is_purged = models.BooleanField(default=False)
-    purge_window_days = models.IntegerField(default=1)
 
     class Meta:
         db_table = 'wall_e_models_ban_records'
@@ -99,18 +97,6 @@ class BanRecord(models.Model):
         user.unban_date = pstdatetime.now().pst
         user.save()
         return user.username
-
-    @classmethod
-    @sync_to_async
-    def get_unpurged_users(cls) -> List[BanRecord]:
-        return list(BanRecord.objects.all().filter(is_purged=False))
-
-    @classmethod
-    @sync_to_async
-    def marked_user_as_purged(cls, record_id):
-        record_obj = BanRecord.objects.get(id=record_id)
-        record_obj.is_purged = True
-        record_obj.save()
 
     def __str__(self) -> str:
         return f"id=[{self.id}] username=[{self.username}] user_id=[{self.user_id}] " \
